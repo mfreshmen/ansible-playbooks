@@ -1,0 +1,13 @@
+[Unit]
+Description=NodeJS Hello World app
+After=multi-user.target
+
+[Service]
+User=node
+WorkingDirectory=/data/nodejs-helloworld
+Type=simple
+ExecStart=/bin/npm run start
+StandardInput=tty-force
+
+[Install]
+WantedBy=multi-user.target

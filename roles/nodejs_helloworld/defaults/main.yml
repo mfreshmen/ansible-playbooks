@@ -1,0 +1,26 @@
+---
+# Deploy folder
+app_deploy_folder: /data/nodejs-helloworld
+
+# Temp Deploy folder
+app_temp_deploy_folder: /tmp/nodejs-helloworld
+
+# Backup folder
+app_backup_folder: /data/bkp/nodejs-helloworld
+
+# linux user to start the service
+app_user: node
+
+# linux group to start the service
+app_group: node
+
+# Name of app
+
+app_name: nodejs-helloworld
+
+# Name of systemd service
+
+app_service_name: helloworld
+
+
+

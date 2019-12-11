@@ -1,0 +1,78 @@
+- name: "Install NodeJS and npm"
+  yum:
+    name: nodejs 
+    state: installed
+
+- name: "Create group for app"
+  group:
+    name: "{{ app_group }}"
+    state: present
+
+- name: "Create user for app"
+  user:
+    name: "{{ app_user }}"
+    group: "{{ app_group }}"
+    state: present
+
+- name: Copy systemd file service
+  template:
+      src: helloworld.j2
+      dest: /etc/systemd/system/helloworld.service
+
+- name: "Create deploy folder if not exists"
+  file:
+    path: '{{ app_deploy_folder }}'
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+
+- name: "Create temp deploy folder if not exists"
+  file:
+    path: '{{ app_temp_deploy_folder }}'
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+- name: "Create backup folder if not exists"
+  file:
+    path: '{{ app_backup_folder }}'
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+- name: "backup application"
+  archive:
+    path: '{{ app_deploy_folder }}'
+    dest: '{{ app_backup_folder }}/{{ app_name }}.tgz'
+
+- name: "Artifactory - Download application"
+  get_url:
+    url: '{{ app_src_url }}'
+    url_username: user
+    url_password: taiKuLRPTOX2
+    dest: "{{ app_temp_deploy_folder }}/{{ app_name }}.tgz"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    force: yes
+    mode: "u+x"
+
+- name: Extract application into {{app_deploy_folder}}
+  shell: "tar -zxvf {{ app_temp_deploy_folder }}/{{ app_name }}.tgz -C {{ app_deploy_folder }}"
+  notify:
+    - Restart application
+
+- name: Set perms to {{app_deploy_folder}}
+  file:
+    path: '{{ app_deploy_folder }}'
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    recurse: yes
+
+- name: Start and enable service
+  systemd:
+    name: helloworld
+    state: started
+    enabled: yes
+
